@@ -1,0 +1,12 @@
+# Binaries
+/sblint
+/sblint-*
+
+# Test artifacts
+*.test
+coverage.out
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
