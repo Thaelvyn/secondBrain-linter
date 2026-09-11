@@ -1,0 +1,48 @@
+# Second Brain taxonomy registry (canonical, machine-readable; ADR 0002)
+# Keyed by full path — personal and work vocabularies never merge by basename.
+scopes:
+  personal:
+    description: Personal memory tree
+    categories:
+      people: { kind: entity }
+      places: { kind: entity }
+      calendar: { kind: collection }
+      events: { kind: collection }
+      health: { kind: collection }
+      finance: { kind: collection }
+      home: { kind: collection }
+      vehicles: { kind: entity }
+      travel: { kind: entity }
+      learning: { kind: entity }
+      hobbies: { kind: entity }
+      projects: { kind: entity }
+      admin: { kind: collection }
+      ideas: { kind: collection }
+      media: { kind: collection }
+  work:
+    description: Work memory tree; categories repeat per company folder
+    companies: [webdex, emi]
+    categories:
+      people: { kind: entity }
+      projects: { kind: entity }
+      teams: { kind: entity }
+      systems: { kind: entity }
+      processes: { kind: entity }
+      decisions: { kind: collection }
+      vendors: { kind: entity }
+      incidents: { kind: collection }
+      goals: { kind: entity }
+  goals:
+    description: Top-level, cross-domain goals
+    categories: {}
+  reference:
+    description: External knowledge; book notes, articles, research
+    categories: {}
+event_types:
+  meeting: { template: _system/templates/meeting.md }
+  interaction: { template: _system/templates/interaction.md }
+  decision: { template: _system/templates/decision.md }
+  fact: { template: _system/templates/fact.md }
+  observation: { template: _system/templates/observation.md }
+  incident: { template: _system/templates/incident.md }
+slug_rules: { lowercase: true, kebab: true, ascii: true }
