@@ -8,7 +8,7 @@
 sblint [flags] <vault-path>
   --json      machine-readable JSON output to stdout
   --report    write timestamped report to <vault>/_system/status/lint/sblint-YYYYmmdd-HHMMSS.txt (console format)
-  --version   print version (ldflags-injected, default v0.1.1)
+  --version   print version (ldflags-injected, default v0.1.2)
   -h / --help
 ```
 
@@ -33,7 +33,7 @@ JSON:
 | # | Severity | Rule |
 |---|----------|------|
 | 1 | error | Folder and file slugs lowercase, kebab-case, ASCII, no spaces (exempt: dotfiles/dirs, README.md, `_`-prefixed structural names) |
-| 2 | error | Entry filenames (and daily-log files) match `{YYYY-MM-DD}-{slug}.md` (folder notes exempt) |
+| 2 | error | Entry filenames (and daily-log files) match `{YYYY-MM-DD}-{slug}.md` (folder notes and `daily-logs/in/` drop-zone files exempt) |
 | 3 | error | Every entity folder (dir whose subpaths contain entries) contains its `{folder}/{folder}.md` folder note |
 | 4 | error | Category folder names exist in `_system/taxonomy.yaml`; work company dirs in the `companies` list, `_shared` allowed |
 | 5 | error | Entry required frontmatter present: event_id, date, type, perspective, privacy, entities, origin, source, summary |
@@ -69,7 +69,7 @@ JSON:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Thaelvyn/secondBrain-linter/main/scripts/install.sh | bash
 # or pinned:
-curl -fsSL .../install.sh | bash -s -- --version v0.1.1
+curl -fsSL .../install.sh | bash -s -- --version v0.1.2
 ```
 
 The script downloads the release binary for `GOOS/GOARCH` (darwin arm64 / linux amd64) into `~/scripts/bin/sblint`. Idempotent.

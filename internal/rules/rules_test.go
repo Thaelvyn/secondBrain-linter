@@ -244,3 +244,55 @@ children_counts: {}
 ---
 `, kind, name, scope)
 }
+
+func TestRule02SkipsDailyLogsInDropZone(t *testing.T) {
+	cases := []struct {
+		name  string
+		files map[string]string
+		want  []vault.Finding
+	}{
+		{
+			name: "bare file in drop zone has zero findings",
+			files: map[string]string{
+				"todos.md":               "x\n",
+				"inbox/review.md":        "x\n",
+				"daily-logs/in/notes.md": "human dropped notes, no frontmatter\n",
+			},
+			want: nil,
+		},
+		{
+			name: "dated rough file in drop zone has zero findings",
+			files: map[string]string{
+				"todos.md":        "x\n",
+				"inbox/review.md": "x\n",
+				"daily-logs/in/2026-09-10-journal-rough.md": "rough journal\n",
+			},
+			want: nil,
+		},
+		{
+			name: "bad name outside drop zone still flagged",
+			files: map[string]string{
+				"todos.md":                    "x\n",
+				"inbox/review.md":             "x\n",
+				"daily-logs/2026/01/notes.md": "x\n",
+			},
+			want: []vault.Finding{
+				{Rule: 2, Severity: vault.SeverityError, Path: "daily-logs/2026/01/notes.md", Message: "daily-log filename must match {YYYY-MM-DD}-{slug}.md"},
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v, err := scanTestVault(t, tc.files)
+			if err != nil {
+				t.Fatal(err)
+			}
+			c := New(v, emptyTax())
+			Run(c)
+			got := sortedFindings(c.Findings)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("findings mismatch:\n got: %+v\nwant: %+v", got, tc.want)
+			}
+		})
+	}
+}

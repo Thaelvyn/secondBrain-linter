@@ -21,6 +21,9 @@ func rule02(c *Context) {
 		if !f.Markdown || !strings.HasPrefix(f.Path, "daily-logs/") {
 			continue
 		}
+		if strings.HasPrefix(f.Path, "daily-logs/in/") {
+			continue
+		}
 		if isFolderNote(f) {
 			continue
 		}

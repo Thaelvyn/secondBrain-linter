@@ -5,7 +5,7 @@ set -euo pipefail
 VERSION=""
 if [[ "${1:-}" == "--version" ]]; then
   if [[ $# -lt 2 ]]; then
-    echo "install.sh: --version requires a value (e.g. v0.1.1)" >&2
+    echo "install.sh: --version requires a value (e.g. v0.1.2)" >&2
     exit 1
   fi
   VERSION="$2"
