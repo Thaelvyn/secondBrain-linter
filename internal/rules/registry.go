@@ -6,7 +6,7 @@ type Rule struct {
 	Run func(*Context)
 }
 
-// Rules is the v1 registry, applied in rule-number order.
+// Rules is the registry, applied in rule-number order.
 var Rules = []Rule{
 	{Num: 1, Run: rule01},
 	{Num: 2, Run: rule02},
@@ -26,6 +26,10 @@ var Rules = []Rule{
 	{Num: 16, Run: rule16},
 	{Num: 17, Run: rule17},
 	{Num: 18, Run: rule18},
+	{Num: 19, Run: rule19},
+	{Num: 20, Run: rule20},
+	{Num: 21, Run: rule21},
+	{Num: 22, Run: rule22},
 }
 
 // Run executes every registered rule against the context.

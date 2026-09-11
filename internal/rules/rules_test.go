@@ -68,6 +68,7 @@ func TestViolationsFixtureGolden(t *testing.T) {
 		{Rule: 8, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-badid.md", Message: "event_id \"2026-01-01-nothexatall\" does not match {YYYY-MM-DD}-{12-hex}"},
 		{Rule: 9, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-02-dupe-a.md", Message: "duplicate event_id 2026-01-02-cafebabe0001 across 2 entries with no mutual related links between them"},
 		{Rule: 10, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-badlink.md", Message: "wikilink [[personal/people/zelda]] does not resolve to an existing file"},
+		{Rule: 10, Severity: vault.SeverityError, Path: "todos.md", Message: "wikilink [[personal/people/jane-doe/meeting/2026/2026-01-01-nope]] does not resolve to an existing file"},
 		{Rule: 11, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-plainrelated.md", Message: "frontmatter entities must contain only plain paths, no brackets"},
 		{Rule: 11, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-plainrelated.md", Message: "frontmatter related must contain only wikilinks ([[full/path]])"},
 		{Rule: 11, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-plainrelated.md", Message: "frontmatter source must contain only plain paths, no brackets"},
@@ -78,7 +79,16 @@ func TestViolationsFixtureGolden(t *testing.T) {
 		{Rule: 16, Severity: vault.SeverityError, Path: "personal/people/jane-doe/misc/2026-01-01-misplaced.md", Message: "entry parent folder must be a 4-digit year folder (got \"misc\")"},
 		{Rule: 16, Severity: vault.SeverityError, Path: "personal/people/jane-doe/whatever/2026/2026-01-01-misplaced2.md", Message: "folder above the year must be an event type or a collection category from the taxonomy catalog (got \"whatever\")"},
 		{Rule: 17, Severity: vault.SeverityError, Path: "loose.md", Message: "file outside known top-level scopes; allowed root files: todos.md, README.md"},
-		{Rule: 18, Severity: vault.SeverityError, Path: "todos.md", Message: "todos.md must exist at the vault root"},
+		{Rule: 19, Severity: vault.SeverityWarning, Path: "personal/admin/admin.md", Message: "children_counts[\"2019\"]: stored 3, actual 0"},
+		{Rule: 19, Severity: vault.SeverityWarning, Path: "personal/people/jane-doe/jane-doe.md", Message: "children_counts[\"meeting\"]: stored 0, actual 16"},
+		{Rule: 19, Severity: vault.SeverityWarning, Path: "personal/projects/projects.md", Message: "children_counts is missing; expected {}"},
+		{Rule: 20, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-plainrelated.md", Message: "source file does not exist: [[daily-logs/2026/01/notes.md]]"},
+		{Rule: 20, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-03-badsource.md", Message: "source file does not exist: daily-logs/2026/01/missing.md"},
+		{Rule: 21, Severity: vault.SeverityWarning, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-kickoff2.md", Message: "open inline task \"Book follow-up room\" has no matching todos.md row"},
+		{Rule: 21, Severity: vault.SeverityWarning, Path: "todos.md", Message: "todos row event_id \"2026-01-01-badbadbadbad\" does not match personal/people/jane-doe/meeting/2026/2026-01-01-kickoff2.md"},
+		{Rule: 21, Severity: vault.SeverityWarning, Path: "todos.md", Message: "todos row references a file that does not exist: [[personal/people/jane-doe/meeting/2026/2026-01-01-nope]]"},
+		{Rule: 22, Severity: vault.SeverityWarning, Path: "_system/templates/hologram.md", Message: "template missing for type hologram: cannot validate body headings"},
+		{Rule: 22, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-nosummary.md", Message: "missing required heading \"## Decisions\" for type \"meeting\""},
 	}
 	if len(fs) != len(want) {
 		t.Fatalf("got %d findings, want %d:\n%+v", len(fs), len(want), fs)
@@ -110,8 +120,8 @@ func TestCounts(t *testing.T) {
 			w++
 		}
 	}
-	if e != 23 || w != 2 {
-		t.Fatalf("counts = %d errors, %d warnings; want 23, 2", e, w)
+	if e != 26 || w != 9 {
+		t.Fatalf("counts = %d errors, %d warnings; want 26, 9", e, w)
 	}
 }
 
@@ -125,11 +135,13 @@ func TestRule16CollectionCategories(t *testing.T) {
 		{
 			name: "collection category above year is allowed",
 			files: map[string]string{
-				"todos.md":                    "x\n",
-				"inbox/review.md":             "x\n",
-				"work/work.md":                folderNoteMD("collection", "work", "work"),
-				"work/emi/emi.md":             folderNoteMD("collection", "emi", "work"),
-				"work/emi/journal/journal.md": folderNoteMD("collection", "journal", "work"),
+				"todos.md":                     "x\n",
+				"inbox/review.md":              "x\n",
+				"_system/templates/meeting.md": meetingTemplate,
+				meetingSource:                  "x\n",
+				"work/work.md":                 folderNoteMD("collection", "work", "work"),
+				"work/emi/emi.md":              folderNoteMD("collection", "emi", "work"),
+				"work/emi/journal/journal.md":  folderNoteMDCounts("collection", "journal", "work", `{"2026": 1}`),
 				"work/emi/journal/2026/2026-09-11-ruta-review.md": entryMD("2026-09-11-abcdef123456", "2026-09-11", "meeting"),
 			},
 			tax:  scopedTax("work", []string{"webdex", "emi"}, map[string]string{"journal": "collection", "people": "entity"}, []string{"meeting"}),
@@ -140,6 +152,8 @@ func TestRule16CollectionCategories(t *testing.T) {
 			files: map[string]string{
 				"todos.md":                             "x\n",
 				"inbox/review.md":                      "x\n",
+				"_system/templates/meeting.md":         meetingTemplate,
+				meetingSource:                          "x\n",
 				"work/work.md":                         folderNoteMD("collection", "work", "work"),
 				"work/emi/emi.md":                      folderNoteMD("collection", "emi", "work"),
 				"work/emi/people/people.md":            folderNoteMD("entity", "people", "work"),
@@ -155,9 +169,11 @@ func TestRule16CollectionCategories(t *testing.T) {
 			files: map[string]string{
 				"todos.md":                             "x\n",
 				"inbox/review.md":                      "x\n",
+				"_system/templates/meeting.md":         meetingTemplate,
+				meetingSource:                          "x\n",
 				"personal/personal.md":                 folderNoteMD("collection", "personal", "personal"),
 				"personal/people/people.md":            folderNoteMD("collection", "people", "personal"),
-				"personal/people/jane-doe/jane-doe.md": folderNoteMD("entity", "jane-doe", "personal"),
+				"personal/people/jane-doe/jane-doe.md": folderNoteMDCounts("entity", "jane-doe", "personal", `{meeting: 1}`),
 				"personal/people/jane-doe/meeting/2026/2026-09-11-x.md": entryMD("2026-09-11-abcdef123456", "2026-09-11", "meeting"),
 			},
 			tax:  scopedTax("personal", nil, map[string]string{"people": "entity"}, []string{"meeting"}),
@@ -168,6 +184,8 @@ func TestRule16CollectionCategories(t *testing.T) {
 			files: map[string]string{
 				"todos.md":                                               "x\n",
 				"inbox/review.md":                                        "x\n",
+				"_system/templates/meeting.md":                           meetingTemplate,
+				meetingSource:                                            "x\n",
 				"personal/personal.md":                                   folderNoteMD("collection", "personal", "personal"),
 				"personal/people/people.md":                              folderNoteMD("collection", "people", "personal"),
 				"personal/people/jane-doe/jane-doe.md":                   folderNoteMD("entity", "jane-doe", "personal"),
@@ -230,6 +248,10 @@ summary: review notes
 }
 
 func folderNoteMD(kind, name, scope string) string {
+	return folderNoteMDCounts(kind, name, scope, "{}")
+}
+
+func folderNoteMDCounts(kind, name, scope, counts string) string {
 	return fmt.Sprintf(`---
 type: %s
 name: %s
@@ -240,10 +262,20 @@ aliases: []
 related: []
 status: active
 created: 2026-09-11
-children_counts: {}
+children_counts: %s
 ---
-`, kind, name, scope)
+`, kind, name, scope, counts)
 }
+
+// meetingTemplate is a minimal meeting template for scanTestVault-based tests:
+// present so rule 22 does not warn, and heading-free so it does not error.
+const meetingTemplate = `---
+type: meeting
+---
+`
+
+// meetingSource is a daily-log the entry fixtures reference, so rule 20 passes.
+const meetingSource = "daily-logs/2026/09/2026-09-10-1432.md"
 
 func TestRule02SkipsDailyLogsInDropZone(t *testing.T) {
 	cases := []struct {

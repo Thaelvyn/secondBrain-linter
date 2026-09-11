@@ -7,8 +7,8 @@ import (
 )
 
 // rule10: all wikilinks [[...]] resolve to existing files. Aliases (|...)
-// and anchors (#...) are stripped; targets are tried as-is, with ".md", and
-// as folder notes. Embeds (![[...]]) are skipped here and reported by rule 12.
+// and anchors (#...) are stripped; targets are tried as-is and with ".md".
+// Embeds (![[...]]) are skipped here and reported by rule 12.
 func rule10(c *Context) {
 	for _, f := range c.Vault.Files {
 		if !f.Markdown {

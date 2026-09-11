@@ -10,9 +10,9 @@ import (
 func emptyTax() *taxonomy.Taxonomy {
 	return &taxonomy.Taxonomy{
 		Scopes: map[string]taxonomy.Scope{
-			"personal":  {Categories: map[string]taxonomy.Category{}},
-			"work":      {Categories: map[string]taxonomy.Category{}},
-			"goals":     {Categories: map[string]taxonomy.Category{}},
+			"personal": {Categories: map[string]taxonomy.Category{}},
+			"work":     {Categories: map[string]taxonomy.Category{}},
+			"goals":    {Categories: map[string]taxonomy.Category{}},
 			"reference": {Categories: map[string]taxonomy.Category{}},
 		},
 		EventTypes: map[string]taxonomy.EventType{},

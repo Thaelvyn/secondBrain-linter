@@ -58,8 +58,7 @@ func TestResolveWiki(t *testing.T) {
 		{"dir/dir.md", "dir/dir.md"},
 		{"personal/people/jane-doe", "personal/people/jane-doe/jane-doe.md"},
 		{"missing", ""},
-		{"dir/missing", ""},
-		{"dir/", "dir/dir.md"},
+		{"dir/missing", ""}, {"dir/", "dir/dir.md"},
 		{"dir/#anchor", "dir/dir.md"},
 		{"", ""},
 	}

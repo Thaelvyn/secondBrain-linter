@@ -103,6 +103,7 @@ func TestWriteFile(t *testing.T) {
 	if string(data) != "console text\n" {
 		t.Errorf("report content = %q", data)
 	}
+	// name must embed a parsable timestamp
 	base := filepath.Base(p)
 	ts := strings.TrimSuffix(strings.TrimPrefix(base, "sblint-"), ".txt")
 	if _, err := time.Parse("20060102-150405", ts); err != nil {

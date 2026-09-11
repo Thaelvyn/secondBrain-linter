@@ -22,3 +22,5 @@ related: []
 ## Decisions
 
 ## Actions
+
+## Related <!-- optional -->
