@@ -8,7 +8,7 @@
 sblint [flags] <vault-path>
   --json      machine-readable JSON output to stdout
   --report    write timestamped report to <vault>/_system/status/lint/sblint-YYYYmmdd-HHMMSS.txt (console format)
-  --version   print version (ldflags-injected, default dev)
+  --version   print version (ldflags-injected, default v0.1.1)
   -h / --help
 ```
 
@@ -47,7 +47,7 @@ JSON:
 | 13 | error | Perspective groups (same event_id, ≥2 entries) full directed mesh via `related` |
 | 14 | warning | Orphan entity folder: entity-type note with no entries beneath (stub allowed, flagged) |
 | 15 | warning | Path depth > 8 segments (relative to vault root) |
-| 16 | error | Entry leaves: parent is 4-digit year dir, above it an event type from taxonomy, filename starts with frontmatter date |
+| 16 | error | Entry leaves: parent is 4-digit year dir, above it an event type or collection category from taxonomy, filename starts with frontmatter date |
 | 17 | error | Files outside known top-level scopes (root files allowed: todos.md, README.md) |
 | 18 | error | `todos.md` and `inbox/review.md` exist |
 
@@ -59,7 +59,7 @@ JSON:
 - **R3 scoping**: a folder-note is required for every ancestor dir of an entry except 4-digit year dirs, dirs under the structural top-levels, and event-type dirs (`{type}` or `{type}s`).
 - **R9 vs R13**: a group with no mutual (bidirectional) link pair is reported once by R9; groups with at least one mutual pair are mesh-checked by R13 (one finding per group listing missing directed links).
 - **R10 resolution order**: target → target+".md" → `{target}/{basename}.md` (folder note). Embeds `![[` are skipped by R10 and reported by R12 only.
-- **R16** uses the exact `event_types` keys from the taxonomy (`meeting`, `interaction`, …) for the dir above the year.
+- **R16** uses the exact `event_types` keys from the taxonomy (`meeting`, `interaction`, …) or `kind: collection` category names (`journal`, `decisions`, …) for the dir above the year.
 - **R17** reports stray root files; unknown root *folders* are reported by R4 (no double-reporting).
 - Frontmatter with malformed YAML (including duplicate keys) is treated as absent; the file is not analyzed as an entry. `date:`-style values parsed by yaml.v3 as timestamps are normalized to YYYY-MM-DD.
 - Rules 19–22 (children_counts drift, source existence, todo reconciliation, body-heading validation) are **not** part of v1 (ADR 0006 adds rule 22; deferred).
@@ -69,7 +69,7 @@ JSON:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Thaelvyn/secondBrain-linter/main/scripts/install.sh | bash
 # or pinned:
-curl -fsSL .../install.sh | bash -s -- --version v0.1.0
+curl -fsSL .../install.sh | bash -s -- --version v0.1.1
 ```
 
 The script downloads the release binary for `GOOS/GOARCH` (darwin arm64 / linux amd64) into `~/scripts/bin/sblint`. Idempotent.

@@ -43,8 +43,9 @@ type Context struct {
 	EntriesBeneath map[string]int             // dir -> count of entries in its subtree
 	RelatedLinks   map[string]map[string]bool // file path -> resolved related targets
 
-	typeFamilies map[string]bool
-	Findings     []vault.Finding
+	typeFamilies       map[string]bool
+	collectionFamilies map[string]bool
+	Findings           []vault.Finding
 }
 
 // New assembles the context from the scanned vault and taxonomy.
@@ -61,6 +62,14 @@ func New(v *vault.Vault, tax *taxonomy.Taxonomy) *Context {
 		for t := range tax.EventTypes {
 			c.typeFamilies[t] = true
 			c.typeFamilies[t+"s"] = true
+		}
+		c.collectionFamilies = map[string]bool{}
+		for _, s := range tax.Scopes {
+			for name, cat := range s.Categories {
+				if cat.Kind == "collection" {
+					c.collectionFamilies[name] = true
+				}
+			}
 		}
 	}
 	for _, f := range v.Files {

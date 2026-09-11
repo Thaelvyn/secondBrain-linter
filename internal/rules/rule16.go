@@ -7,10 +7,11 @@ import (
 	"github.com/Thaelvyn/secondBrain-linter/internal/vault"
 )
 
-// rule16: entry leaves live under {entity}/{type}/{year}/: the parent folder
-// must be a 4-digit year dir, the folder above it must be one of the event
-// types from the taxonomy catalog, and the filename must start with the
-// frontmatter date (YYYY-MM-DD prefix match).
+// rule16: entry leaves live under {entity}/{type or collection}/{year}/: the
+// parent folder must be a 4-digit year dir, the folder above it must be one
+// of the event types or a collection category from the taxonomy catalog, and
+// the filename must start with the frontmatter date (YYYY-MM-DD prefix
+// match).
 func rule16(c *Context) {
 	for _, ei := range c.Entries {
 		parent := lastSegment(ei.Dir)
@@ -18,8 +19,8 @@ func rule16(c *Context) {
 			c.Add(16, vault.SeverityError, ei.File.Path, fmt.Sprintf("entry parent folder must be a 4-digit year folder (got %q)", parent))
 		} else {
 			gp := lastSegment(parentDir(ei.Dir))
-			if gp != "" && !c.typeFamilies[gp] {
-				c.Add(16, vault.SeverityError, ei.File.Path, fmt.Sprintf("folder above the year must be an event type from the taxonomy catalog (got %q)", gp))
+			if gp != "" && !c.typeFamilies[gp] && !c.collectionFamilies[gp] {
+				c.Add(16, vault.SeverityError, ei.File.Path, fmt.Sprintf("folder above the year must be an event type or a collection category from the taxonomy catalog (got %q)", gp))
 			}
 		}
 		date, ok := fmString(ei.File.Frontmatter, "date")
