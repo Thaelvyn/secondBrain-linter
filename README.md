@@ -11,7 +11,7 @@ sblint [flags] <vault-path>
   --fix       apply best-effort deterministic fixes (R19 children_counts, R3 missing folder notes, R11 related wikilinks), then re-lint and report residuals
   --recount   recompute + rewrite folder-note children_counts only (the R19 fix), print a summary of notes updated; implies fix; idempotent
   --changed   report/fix only files changed vs git (fallback: mtime state file); the scan is still full
-  --version   print version (ldflags-injected, default v0.2.0)
+  --version   print version (ldflags-injected, default v0.2.1)
   -h / --help
 ```
 
@@ -45,7 +45,7 @@ JSON:
 | 8 | error | `event_id` matches `{YYYY-MM-DD}-{12-hex}` |
 | 9 | error | Duplicate `event_id` in ≥2 entries with no mutual related cross-link |
 | 10 | error | All wikilinks `[[...]]` resolve to existing files (alias/anchor stripped; target, target+".md", folder note) |
-| 11 | error | `related` contains only wikilinks; `entities`/`source` plain paths, no brackets |
+| 11 | error | `related` contains only wikilinks; `entities`/`source` plain paths, no brackets; the optional body `## Related` section also contains only wikilinks (`[[full/path]]`) |
 | 12 | error | No embeds anywhere (`![[` forbidden) |
 | 13 | error | Perspective groups (same event_id, ≥2 entries) full directed mesh via `related` |
 | 14 | warning | Orphan entity folder: entity-type note with no entries beneath (stub allowed, flagged) |
@@ -78,7 +78,7 @@ JSON:
 - **Fix scope** (`--fix`): (a) R19 — every linted folder note's `children_counts` is rewritten to the actual map (added if missing; the rest of the frontmatter is kept byte-identical); (b) R3 — a missing folder note `{dir}/{dir}.md` is created (type entity/collection per taxonomy, name = title-cased dir, scope, `status: active`, `created: today`, actual `children_counts`); (c) R11 — bare-path `related` items are wrapped in `[[…]]`. Slug renames stay report-only: renaming files is not a content-safe deterministic operation (links, entities and source paths would silently break), so R1 stayed unfixed. All fixes are idempotent — a second `--fix` changes nothing — and never overwrite content outside the three fields above. After fixing, sblint re-scans, re-runs the rules and reports residual findings.
 - **`--recount`** is the focused R19 fix: it rewrites `children_counts` only, prints which notes were updated ("recounted N file(s)"), and is idempotent. `--fix --recount` behaves exactly like `--recount` (a subset of `--fix`).
 - **`--changed`** reports (and, with `--fix`/`--recount`, fixes) only files changed vs git: `git -C <vault> diff --name-only HEAD` plus `git -C <vault> ls-files --others --exclude-standard` (paths relative to the vault). If git is unavailable or the vault is not a repo, it falls back to an mtime state file at `<vault>/_system/status/lint/.sblint-changed.json` (first run reports everything and records a baseline; later runs report files whose mtime moved past the recorded value). Caveat: context assembly still requires a full scan — `--changed` filters which findings are **reported** (and which files are **fixed**), it does not shorten the scan. Folder-level findings (R3/R14 report on a dir; R19 reports the folder note) also fire when any changed file lives under that dir. With no changed files the output is clean and the exit code is 0.
-- Rules 19–22 and the three fix modes were **shipped in v0.2.0** (ADR 0006 adds rule 22; the ADR 0004 consistency group is now fully implemented).
+- Rules 19–22 and the three fix modes were **shipped in v0.2.0** (ADR 0006 adds rule 22; the ADR 0004 consistency group is now fully implemented). v0.2.1 extends rule 11 to also validate the optional body `## Related` section (wikilinks only).
 - Frontmatter with malformed YAML (including duplicate keys) is treated as absent; the file is not analyzed as an entry. `date:`-style values parsed by yaml.v3 as timestamps are normalized to YYYY-MM-DD.
 
 ## Install
@@ -86,7 +86,7 @@ JSON:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Thaelvyn/secondBrain-linter/main/scripts/install.sh | bash
 # or pinned:
-curl -fsSL .../install.sh | bash -s -- --version v0.2.0
+curl -fsSL .../install.sh | bash -s -- --version v0.2.1
 ```
 
 The script downloads the release binary for `GOOS/GOARCH` (darwin arm64 / linux amd64) into `~/scripts/bin/sblint`. Idempotent.
