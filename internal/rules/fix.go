@@ -192,7 +192,7 @@ func normalizeRelatedField(f *vault.File) (string, bool) {
 
 // AffectedByChange reports whether a finding for the given rule/path is in
 // scope for a --changed run. A nil map means every path is in scope. File
-// findings match exactly; rule 3/14 report on a dir and rule 19 on a folder
+// findings match exactly; rule 3 reports on a dir and rule 19 on a folder
 // note, so they also match when any changed file lives under their dir.
 func AffectedByChange(rule int, path string, changed map[string]bool) bool {
 	if changed == nil {
@@ -203,7 +203,7 @@ func AffectedByChange(rule int, path string, changed map[string]bool) bool {
 	}
 	var prefix string
 	switch rule {
-	case 3, 14:
+	case 3:
 		prefix = path + "/"
 	case 19:
 		prefix = parentDir(path) + "/"

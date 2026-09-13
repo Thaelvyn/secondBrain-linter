@@ -29,7 +29,7 @@ func cleanFixture(t *testing.T) string {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := runMain(t, "--version")
-	if code != 0 || out != "sblint v0.2.1\n" {
+	if code != 0 || out != "sblint v0.2.2\n" {
 		t.Fatalf("version: code=%d out=%q", code, out)
 	}
 }
@@ -73,7 +73,7 @@ func TestViolationsExit1(t *testing.T) {
 	if !strings.Contains(out, "[error] R1 ../../testdata/violations-fixture/personal/Hello World.md") {
 		t.Errorf("expected rooted console line, got:\n%s", out)
 	}
-	if !strings.Contains(out, "26 errors, 9 warnings") {
+	if !strings.Contains(out, "26 errors, 8 warnings") {
 		t.Errorf("expected summary, got:\n%s", out)
 	}
 }
@@ -97,10 +97,10 @@ func TestJSONOutput(t *testing.T) {
 	if got.Vault != "../../testdata/violations-fixture" {
 		t.Errorf("vault = %q", got.Vault)
 	}
-	if len(got.Findings) != 35 {
+	if len(got.Findings) != 34 {
 		t.Errorf("findings = %d", len(got.Findings))
 	}
-	if got.Counts["error"] != 26 || got.Counts["warning"] != 9 {
+	if got.Counts["error"] != 26 || got.Counts["warning"] != 8 {
 		t.Errorf("counts = %+v", got.Counts)
 	}
 }

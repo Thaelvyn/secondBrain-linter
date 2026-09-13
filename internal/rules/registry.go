@@ -21,7 +21,6 @@ var Rules = []Rule{
 	{Num: 11, Run: rule11},
 	{Num: 12, Run: rule12},
 	{Num: 13, Run: rule13},
-	{Num: 14, Run: rule14},
 	{Num: 15, Run: rule15},
 	{Num: 16, Run: rule16},
 	{Num: 17, Run: rule17},

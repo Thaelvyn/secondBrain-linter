@@ -74,7 +74,6 @@ func TestViolationsFixtureGolden(t *testing.T) {
 		{Rule: 11, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-plainrelated.md", Message: "frontmatter source must contain only plain paths, no brackets"},
 		{Rule: 12, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-embed.md", Message: "embeds are forbidden: found ![[...]]"},
 		{Rule: 13, Severity: vault.SeverityError, Path: "personal/people/jane-doe/meeting/2026/2026-01-01-triple-a.md", Message: "perspective group 2026-01-01-deadbeef0001 must cross-reference every other member (full mesh); missing related: personal/people/jane-doe/meeting/2026/2026-01-01-triple-a.md -> personal/people/jane-doe/meeting/2026/2026-01-01-triple-c.md; personal/people/jane-doe/meeting/2026/2026-01-01-triple-b.md -> personal/people/jane-doe/meeting/2026/2026-01-01-triple-c.md; personal/people/jane-doe/meeting/2026/2026-01-01-triple-c.md -> personal/people/jane-doe/meeting/2026/2026-01-01-triple-a.md; personal/people/jane-doe/meeting/2026/2026-01-01-triple-c.md -> personal/people/jane-doe/meeting/2026/2026-01-01-triple-b.md"},
-		{Rule: 14, Severity: vault.SeverityWarning, Path: "personal/people/ghost", Message: "orphan entity folder \"personal/people/ghost\": entity folder note present but no entries beneath it (stub allowed, flagged)"},
 		{Rule: 15, Severity: vault.SeverityWarning, Path: "_system/status/lint/deep/1/2/3/4/x.txt", Message: "path depth 9 exceeds the 8-segment soft cap"},
 		{Rule: 16, Severity: vault.SeverityError, Path: "personal/people/jane-doe/misc/2026-01-01-misplaced.md", Message: "entry parent folder must be a 4-digit year folder (got \"misc\")"},
 		{Rule: 16, Severity: vault.SeverityError, Path: "personal/people/jane-doe/whatever/2026/2026-01-01-misplaced2.md", Message: "folder above the year must be an event type or a collection category from the taxonomy catalog (got \"whatever\")"},
@@ -120,8 +119,8 @@ func TestCounts(t *testing.T) {
 			w++
 		}
 	}
-	if e != 26 || w != 9 {
-		t.Fatalf("counts = %d errors, %d warnings; want 26, 9", e, w)
+	if e != 26 || w != 8 {
+		t.Fatalf("counts = %d errors, %d warnings; want 26, 8", e, w)
 	}
 }
 
