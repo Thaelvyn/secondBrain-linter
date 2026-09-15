@@ -8,12 +8,14 @@ import (
 )
 
 // rule23: every entity named in an entry's `entities` frontmatter that has a
-// folder note must be inline-linked (`[[...]]`) from the entry body. Links may
-// sit anywhere in the body, including the optional `## Related` section; the
-// frontmatter `related` field does not count. The severity follows the folder
-// note's kind: a missing link to a `type: entity` note is an error, to a
-// `type: collection` note a warning (missing/unknown kind counts as entity).
-// Daily-log and `_system` files are never linted as entries.
+// folder note must be inline-linked (`[[...]]`) from the entry body, using the
+// folder-note FILE path (`{entity}/{basename}`), since Obsidian wikilinks
+// resolve to files only. Links may sit anywhere in the body, including the
+// optional `## Related` section; the frontmatter `related` field does not
+// count. The severity follows the folder note's kind: a missing link to a
+// `type: entity` note is an error, to a `type: collection` note a warning
+// (missing/unknown kind counts as entity). Daily-log and `_system` files are
+// never linted as entries.
 func rule23(c *Context) {
 	for _, ei := range c.Entries {
 		if isDailyLogOrSystemPath(ei.File.Path) {
@@ -29,7 +31,8 @@ func rule23(c *Context) {
 			if note == nil {
 				continue
 			}
-			if targets[entity] || targets[entity+".md"] || targets[resolveWiki(entity, c.Vault)] {
+			notePath := strings.TrimSuffix(note.Path, ".md")
+			if targets[notePath] || targets[notePath+".md"] || targets[resolveWiki(notePath, c.Vault)] {
 				continue
 			}
 			sev := vault.SeverityError

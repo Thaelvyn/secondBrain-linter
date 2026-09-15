@@ -316,10 +316,10 @@ func wikiTarget(s string) string {
 	return t
 }
 
-// resolveWiki resolves a target relative to the vault root: tried as-is, with
-// ".md" appended, and as a folder reference resolving to the folder's note
-// ({target}/{basename}.md, per the ADR 0002 link conventions). Returns the
-// canonical file path, or "".
+// resolveWiki resolves a target relative to the vault root: the path is tried
+// as-is, then with ".md" appended. This mirrors Obsidian's wikilink resolver,
+// which only resolves to files: a directory target (folder reference) is not a
+// resolution. Returns the canonical file path, or "".
 func resolveWiki(target string, v *vault.Vault) string {
 	t := strings.TrimSpace(target)
 	if i := strings.IndexByte(t, '#'); i >= 0 {
@@ -334,12 +334,6 @@ func resolveWiki(target string, v *vault.Vault) string {
 	}
 	if _, ok := v.ByPath[t+".md"]; ok {
 		return t + ".md"
-	}
-	if v.DirSet[t] {
-		note := t + "/" + lastSegment(t) + ".md"
-		if _, ok := v.ByPath[note]; ok {
-			return note
-		}
 	}
 	return ""
 }

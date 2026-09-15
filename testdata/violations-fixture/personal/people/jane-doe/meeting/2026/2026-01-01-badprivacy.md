@@ -11,7 +11,7 @@ source: daily-logs/2026/01/2026-01-01-x.md
 summary: Bad privacy
 related: []
 ---
-See [[personal/people/jane-doe]].
+See [[personal/people/jane-doe/jane-doe]].
 
 Body text with a lede.
 

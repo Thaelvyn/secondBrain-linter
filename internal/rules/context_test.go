@@ -53,14 +53,41 @@ func TestResolveWiki(t *testing.T) {
 		{"a", "a.md"},
 		{"a.md", "a.md"},
 		{"b", "b.md"},
-		{"dir", "dir/dir.md"},
 		{"dir/dir", "dir/dir.md"},
 		{"dir/dir.md", "dir/dir.md"},
-		{"personal/people/jane-doe", "personal/people/jane-doe/jane-doe.md"},
 		{"missing", ""},
-		{"dir/missing", ""}, {"dir/", "dir/dir.md"},
-		{"dir/#anchor", "dir/dir.md"},
+		{"dir/missing", ""},
 		{"", ""},
+	}
+	for _, c := range cases {
+		if got := resolveWiki(c.target, v); got != c.want {
+			t.Errorf("resolveWiki(%q) = %q, want %q", c.target, got, c.want)
+		}
+	}
+}
+
+// TestResolveWikiFolderReferenceIsNotAResolution pins the Obsidian behavior:
+// wikilinks resolve to files only, so a directory path never resolves to its
+// folder note. The folder-note file path itself does resolve.
+func TestResolveWikiFolderReferenceIsNotAResolution(t *testing.T) {
+	v, err := scanTestVault(t, map[string]string{
+		"personal/people/jane-doe/jane-doe.md": "x\n",
+		"dir/dir.md":                           "x\n",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		target, want string
+	}{
+		{"dir", ""},
+		{"dir/", ""},
+		{"dir/#anchor", ""},
+		{"personal/people/jane-doe", ""},
+		{"personal/people/jane-doe/", ""},
+		{"dir/dir", "dir/dir.md"},
+		{"dir/dir.md", "dir/dir.md"},
+		{"personal/people/jane-doe/jane-doe", "personal/people/jane-doe/jane-doe.md"},
 	}
 	for _, c := range cases {
 		if got := resolveWiki(c.target, v); got != c.want {

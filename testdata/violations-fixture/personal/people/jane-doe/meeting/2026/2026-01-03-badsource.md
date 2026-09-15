@@ -10,7 +10,7 @@ origin: generated
 source: daily-logs/2026/01/missing.md
 summary: Bad source
 ---
-See [[personal/people/jane-doe]].
+See [[personal/people/jane-doe/jane-doe]].
 
 Body text with a lede.
 

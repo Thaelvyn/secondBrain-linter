@@ -39,8 +39,22 @@ func TestRule23(t *testing.T) {
 			files: mergeFiles(folderNotes, map[string]string{
 				"todos.md":        "x\n",
 				"inbox/review.md": "x\n",
+				rule23EntryPath:   rule23Entry("2026-01-01-abcdef123456", entityFM, "\nSpoke with [[personal/people/jane-doe/jane-doe]] today.\n"),
+			}),
+		},
+		{
+			name: "bare folder path does not satisfy R23",
+			files: mergeFiles(folderNotes, map[string]string{
+				"todos.md":        "x\n",
+				"inbox/review.md": "x\n",
 				rule23EntryPath:   rule23Entry("2026-01-01-abcdef123456", entityFM, "\nSpoke with [[personal/people/jane-doe]] today.\n"),
 			}),
+			want: []vault.Finding{{
+				Rule:     23,
+				Severity: vault.SeverityError,
+				Path:     rule23EntryPath,
+				Message:  `entry body is missing a wikilink to entity "personal/people/jane-doe"`,
+			}},
 		},
 		{
 			name: "missing link to entity folder note is an error",
@@ -129,11 +143,11 @@ func TestRule23LinkForms(t *testing.T) {
 		name string
 		body string
 	}{
-		{name: "plain path", body: "\nSee [[personal/people/jane-doe]].\n"},
-		{name: "alias stripped", body: "\nSee [[personal/people/jane-doe|Jane Doe]].\n"},
-		{name: "anchor stripped", body: "\nSee [[personal/people/jane-doe#Context]].\n"},
-		{name: "md suffix", body: "\nSee [[personal/people/jane-doe.md]].\n"},
-		{name: "body Related section", body: "\nLede.\n\n## Related\n\n- [[personal/people/jane-doe]]\n"},
+		{name: "note file path", body: "\nSee [[personal/people/jane-doe/jane-doe]].\n"},
+		{name: "note file path with alias", body: "\nSee [[personal/people/jane-doe/jane-doe|Jane Doe]].\n"},
+		{name: "note file path with anchor", body: "\nSee [[personal/people/jane-doe/jane-doe#Context]].\n"},
+		{name: "note file path with md suffix", body: "\nSee [[personal/people/jane-doe/jane-doe.md]].\n"},
+		{name: "body Related section", body: "\nLede.\n\n## Related\n\n- [[personal/people/jane-doe/jane-doe]]\n"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -146,6 +160,45 @@ func TestRule23LinkForms(t *testing.T) {
 				t.Fatalf("expected no R23 findings, got: %+v", got)
 			}
 		})
+	}
+}
+
+// TestRule23BareFolderPathIsNotResolved pins that a folder-path wikilink does
+// not count for R23 (matching Obsidian: only file paths resolve).
+func TestRule23BareFolderPathIsNotResolved(t *testing.T) {
+	files := map[string]string{
+		"todos.md":                             "x\n",
+		"inbox/review.md":                      "x\n",
+		"personal/people/jane-doe/jane-doe.md": folderNoteMD("entity", "jane-doe", "personal"),
+		rule23EntryPath: rule23Entry("2026-01-01-abcdef123456", "  - personal/people/jane-doe\n",
+			"\nLede.\n\n## Related\n\n- [[personal/people/jane-doe]]\n"),
+	}
+	want := []vault.Finding{{
+		Rule:     23,
+		Severity: vault.SeverityError,
+		Path:     rule23EntryPath,
+		Message:  `entry body is missing a wikilink to entity "personal/people/jane-doe"`,
+	}}
+	got := byRule(lintVault(t, files, emptyTax()), 23)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("R23 findings mismatch:\n got: %+v\nwant: %+v", got, want)
+	}
+}
+
+// TestRule23FolderNoteFilePathSatisfies pins that the folder-note FILE path
+// ([[work/emi/people/rasa/rasa]]) satisfies R23, even though the bare folder
+// path ([[work/emi/people/rasa]]) does not.
+func TestRule23FolderNoteFilePathSatisfies(t *testing.T) {
+	files := map[string]string{
+		"todos.md":                     "x\n",
+		"inbox/review.md":              "x\n",
+		"work/emi/people/rasa/rasa.md": folderNoteMD("entity", "rasa", "work"),
+		"work/emi/people/rasa/journal/2026/2026-01-01-x.md": rule23Entry("2026-01-01-abcdef123456",
+			"  - work/emi/people/rasa\n", "\nSpoke with [[work/emi/people/rasa/rasa]] today.\n"),
+	}
+	got := byRule(lintVault(t, files, emptyTax()), 23)
+	if got != nil {
+		t.Fatalf("expected no R23 findings, got: %+v", got)
 	}
 }
 

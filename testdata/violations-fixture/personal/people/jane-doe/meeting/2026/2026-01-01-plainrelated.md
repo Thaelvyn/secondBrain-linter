@@ -5,14 +5,14 @@ type: meeting
 perspective: personal
 privacy: private
 entities:
-  - "[[personal/people/jane-doe]]"
+  - "[[personal/people/jane-doe/jane-doe]]"
 origin: generated
 source: "[[daily-logs/2026/01/notes.md]]"
 summary: Plain related
 related:
   - personal/people/jane-doe
 ---
-See [[personal/people/jane-doe]].
+See [[personal/people/jane-doe/jane-doe]].
 
 Body text with a lede.
 

@@ -19,7 +19,7 @@ import (
 )
 
 // version is injected at build time: -ldflags "-X main.version=<tag>".
-var version = "v0.2.3"
+var version = "v0.2.4"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
