@@ -78,6 +78,35 @@ func (c *Context) Fix(opts FixOptions) ([]string, error) {
 		}
 	}
 
+	if !opts.RecountOnly {
+		missing := c.missingMirrors()
+		for _, bPath := range sortedKeys(missing) {
+			if !AffectedByChange(25, bPath, opts.Changed) {
+				continue
+			}
+			b := c.Vault.ByPath[bPath]
+			if b == nil {
+				continue
+			}
+			nc := b.Content
+			for _, item := range missing[bPath] {
+				var did bool
+				nc, did = appendRelationsBodyItem(nc, item)
+				if !did {
+					break
+				}
+			}
+			if nc == b.Content {
+				continue
+			}
+			if err := c.writeFile(bPath, nc); err != nil {
+				return nil, err
+			}
+			b.Content = nc
+			changed[bPath] = true
+		}
+	}
+
 	return sortedKeys(changed), nil
 }
 
@@ -280,6 +309,70 @@ func setFrontmatterField(content, key, replacement string) (string, bool) {
 func matchTopLevelKey(line, key string) bool {
 	t := strings.TrimRight(line, "\r\n")
 	return t == key || strings.HasPrefix(t, key+":")
+}
+
+// appendRelationsBodyItem appends a "- <item>" markdown line to the target
+// note's body `## Relations` section, after its last top-level list item (or
+// directly under the heading when the section has none). When the section is
+// absent it is created at the very end of the file, separated by a blank line.
+// Existing content is preserved byte for byte; the bool reports whether
+// content changed.
+func appendRelationsBodyItem(content, item string) (string, bool) {
+	line := "- " + item
+	lines := strings.SplitAfter(content, "\n")
+	heading := -1
+	for i, l := range lines {
+		if relationsHeadingRe.MatchString(strings.TrimSpace(l)) {
+			heading = i
+			break
+		}
+	}
+	if heading < 0 {
+		return appendRelationsSection(content, line), true
+	}
+	end := len(lines)
+	for i := heading + 1; i < len(lines); i++ {
+		if h2StartRe.MatchString(strings.TrimSpace(lines[i])) {
+			end = i
+			break
+		}
+	}
+	insert := heading + 1
+	for i := heading + 1; i < end; i++ {
+		if listItemRe.MatchString(strings.TrimSpace(lines[i])) {
+			insert = i + 1
+		}
+	}
+	var b strings.Builder
+	for i := 0; i < insert; i++ {
+		b.WriteString(lines[i])
+	}
+	if insert > 0 && !strings.HasSuffix(lines[insert-1], "\n") {
+		b.WriteString("\n")
+	}
+	b.WriteString(line + "\n")
+	for i := insert; i < len(lines); i++ {
+		b.WriteString(lines[i])
+	}
+	nc := b.String()
+	return nc, nc != content
+}
+
+// appendRelationsSection creates the `## Relations` section at the end of a
+// note with a blank-line separation from the existing content.
+func appendRelationsSection(content, line string) string {
+	var b strings.Builder
+	b.WriteString(content)
+	switch {
+	case content == "":
+	case strings.HasSuffix(content, "\n"):
+		b.WriteString("\n")
+	default:
+		b.WriteString("\n\n")
+	}
+	b.WriteString("## Relations\n\n")
+	b.WriteString(line + "\n")
+	return b.String()
 }
 
 func isYAMLContinuation(line string) bool {

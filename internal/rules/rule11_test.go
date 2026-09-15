@@ -28,6 +28,44 @@ func relatedEntry(body string) string { return relatedEntryWithFM("", body) }
 
 const relatedEntryPath = "personal/people/jane-doe/meeting/2026/2026-01-01-x.md"
 
+func TestRule11RelationsHeadingIsNotRelated(t *testing.T) {
+	// `## Relations` (R24/R25) must not be parsed as rule 11's `## Related`
+	// body section, and vice versa.
+	cases := []struct {
+		name string
+		body string
+		want []vault.Finding
+	}{
+		{
+			name: "Relations section is ignored by R11",
+			body: "\n\n## Relations\n\n- partner [[personal/people/jane-doe]]\n",
+		},
+		{
+			name: "Related section still enforced",
+			body: "\n\n## Related\n\n- partner [[personal/people/jane-doe]]\n",
+			want: []vault.Finding{{
+				Rule:     11,
+				Severity: vault.SeverityError,
+				Path:     relatedEntryPath,
+				Message:  "body Related section must contain only wikilinks ([[full/path]])",
+			}},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			files := map[string]string{
+				"todos.md":        "x\n",
+				"inbox/review.md": "x\n",
+				relatedEntryPath:  relatedEntry(tc.body),
+			}
+			got := byRule(lintVault(t, files, emptyTax()), 11)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("R11 findings mismatch:\n got: %+v\nwant: %+v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestRule11BodyRelated(t *testing.T) {
 	bodyErr := []vault.Finding{{
 		Rule:     11,

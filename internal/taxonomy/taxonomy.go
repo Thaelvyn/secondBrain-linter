@@ -28,10 +28,18 @@ type EventType struct {
 	Template string `yaml:"template"`
 }
 
+// RelationKind describes a typed people relationship: either symmetric
+// (`partner`, `sibling`) or carrying the inverse kind (`parent` <-> `child`).
+type RelationKind struct {
+	Symmetric bool   `yaml:"symmetric"`
+	Inverse   string `yaml:"inverse"`
+}
+
 // Taxonomy is the parsed registry.
 type Taxonomy struct {
-	Scopes     map[string]Scope     `yaml:"scopes"`
-	EventTypes map[string]EventType `yaml:"event_types"`
+	Scopes        map[string]Scope        `yaml:"scopes"`
+	EventTypes    map[string]EventType    `yaml:"event_types"`
+	RelationKinds map[string]RelationKind `yaml:"relation_kinds"`
 }
 
 // Load parses <root>/_system/taxonomy.yaml. A missing or malformed file
@@ -50,6 +58,9 @@ func Load(root string) (*Taxonomy, error) {
 	}
 	if t.EventTypes == nil {
 		t.EventTypes = map[string]EventType{}
+	}
+	if t.RelationKinds == nil {
+		t.RelationKinds = map[string]RelationKind{}
 	}
 	for k, s := range t.Scopes {
 		if s.Categories == nil {

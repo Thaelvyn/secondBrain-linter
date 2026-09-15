@@ -1,4 +1,4 @@
-// Package rules implements the sblint rule set (ADR 0004 rules 1-23).
+// Package rules implements the sblint rule set (ADR 0004 rules 1-25).
 package rules
 
 import (

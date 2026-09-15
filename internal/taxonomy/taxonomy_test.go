@@ -24,6 +24,19 @@ scopes:
 event_types:
   meeting: { template: _system/templates/meeting.md }
   interaction: { template: _system/templates/interaction.md }
+relation_kinds:
+  partner:      { symmetric: true }
+  spouse:       { symmetric: true }
+  ex_spouse:    { symmetric: true }
+  parent:       { inverse: child }
+  child:        { inverse: parent }
+  sibling:      { symmetric: true }
+  friend:       { symmetric: true }
+  acquaintance: { symmetric: true }
+  colleague:    { symmetric: true }
+  peer:         { symmetric: true }
+  manager:      { inverse: report }
+  report:       { inverse: manager }
 `
 
 func TestLoad(t *testing.T) {
@@ -54,6 +67,18 @@ func TestLoad(t *testing.T) {
 	}
 	if tax.EventTypes["meeting"].Template != "_system/templates/meeting.md" {
 		t.Errorf("template = %q", tax.EventTypes["meeting"].Template)
+	}
+	if len(tax.RelationKinds) != 12 {
+		t.Fatalf("relation_kinds = %d, want 12", len(tax.RelationKinds))
+	}
+	if !tax.RelationKinds["partner"].Symmetric {
+		t.Error("partner must be symmetric")
+	}
+	if tax.RelationKinds["parent"].Inverse != "child" {
+		t.Errorf("parent inverse = %q, want child", tax.RelationKinds["parent"].Inverse)
+	}
+	if tax.RelationKinds["manager"].Inverse != "report" {
+		t.Errorf("manager inverse = %q, want report", tax.RelationKinds["manager"].Inverse)
 	}
 }
 
@@ -108,7 +133,10 @@ func TestLoadMissingMaps(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tax.Scopes == nil || tax.EventTypes == nil {
+	if tax.Scopes == nil || tax.EventTypes == nil || tax.RelationKinds == nil {
 		t.Fatal("maps must be non-nil after Load")
+	}
+	if len(tax.RelationKinds) != 0 {
+		t.Fatalf("relation_kinds must be empty when absent, got %d", len(tax.RelationKinds))
 	}
 }

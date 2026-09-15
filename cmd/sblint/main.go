@@ -1,4 +1,4 @@
-// Command sblint lints an Obsidian secondBrain vault (ADR 0004, rules 1-23).
+// Command sblint lints an Obsidian secondBrain vault (ADR 0004, rules 1-25).
 //
 // Exit codes: 0 = clean, 1 = violations found, 2 = internal error.
 package main
@@ -19,7 +19,7 @@ import (
 )
 
 // version is injected at build time: -ldflags "-X main.version=<tag>".
-var version = "v0.2.4"
+var version = "v0.3.0"
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
@@ -30,12 +30,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fs.SetOutput(stderr)
 	jsonOut := fs.Bool("json", false, "machine-readable JSON output to stdout")
 	writeReport := fs.Bool("report", false, "write a timestamped report to <vault>/_system/status/lint/")
-	fixFlag := fs.Bool("fix", false, "apply best-effort deterministic fixes (rules 19, 3, 11), then re-lint")
+	fixFlag := fs.Bool("fix", false, "apply best-effort deterministic fixes (rules 19, 3, 11, 25), then re-lint")
 	recountFlag := fs.Bool("recount", false, "recompute and rewrite folder-note children_counts only (rule 19); implies fix")
 	changedFlag := fs.Bool("changed", false, "report/fix only files changed vs git (mtime fallback without git)")
 	showVersion := fs.Bool("version", false, "print the sblint version and exit")
 	fs.Usage = func() {
-		fmt.Fprintf(stderr, "sblint - secondBrain vault linter (ADR 0004, rules 1-23)\n\n")
+		fmt.Fprintf(stderr, "sblint - secondBrain vault linter (ADR 0004, rules 1-25)\n\n")
 		fmt.Fprintf(stderr, "Usage: sblint [flags] <vault-path>\n\n")
 		fmt.Fprintf(stderr, "Flags:\n")
 		fs.PrintDefaults()

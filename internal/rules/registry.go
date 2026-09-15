@@ -30,6 +30,8 @@ var Rules = []Rule{
 	{Num: 21, Run: rule21},
 	{Num: 22, Run: rule22},
 	{Num: 23, Run: rule23},
+	{Num: 24, Run: rule24},
+	{Num: 25, Run: rule25},
 }
 
 // Run executes every registered rule against the context.
