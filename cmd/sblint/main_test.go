@@ -29,7 +29,7 @@ func cleanFixture(t *testing.T) string {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := runMain(t, "--version")
-	if code != 0 || out != "sblint v0.2.2\n" {
+	if code != 0 || out != "sblint v0.2.3\n" {
 		t.Fatalf("version: code=%d out=%q", code, out)
 	}
 }

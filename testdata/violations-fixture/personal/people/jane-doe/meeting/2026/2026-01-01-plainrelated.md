@@ -12,6 +12,7 @@ summary: Plain related
 related:
   - personal/people/jane-doe
 ---
+See [[personal/people/jane-doe]].
 
 Body text with a lede.
 
